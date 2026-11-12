@@ -1,0 +1,67 @@
+pipeline {
+    agent any
+
+    environment {
+        DOCKER_CREDENTIALS_ID = 'dockerhub-credentials' 
+        DOCKER_IMAGE_NAME     = 'jj0305/sistema-gestion-academica'
+        IMAGE_TAG             = "${env.BUILD_NUMBER}"
+    }
+
+    stages {
+        stage('Checkout') {
+            steps {
+                checkout scm
+            }
+        }
+
+        stage('Build') {
+            steps {
+                sh 'mvn clean compile'
+            }
+        }
+
+        stage('Test') {
+            steps {
+                sh 'mvn test'
+            }
+        }
+
+        stage('Package') {
+            steps {
+                sh 'mvn package -DskipTests'
+            }
+        }
+
+        stage('Docker Build') {
+            steps {
+                sh "docker build -t ${DOCKER_IMAGE_NAME}:${IMAGE_TAG} -t ${DOCKER_IMAGE_NAME}:latest ."
+            }
+        }
+
+        stage('Docker Push') {
+            steps {
+                script {
+                    docker.withRegistry('https://index.docker.io/v1/', DOCKER_CREDENTIALS_ID) {
+                        sh "docker push ${DOCKER_IMAGE_NAME}:${IMAGE_TAG}"
+                        sh "docker push ${DOCKER_IMAGE_NAME}:latest"
+                    }
+                }
+            }
+        }
+
+        stage('Deploy') {
+            steps {
+                sh 'kubectl apply -f kubernetes/'
+            }
+        }
+    }
+
+    post {
+        success {
+            echo '¡Pipeline ejecutado exitosamente y desplegado en Kubernetes!'
+        }
+        failure {
+            echo 'El pipeline ha fallado en alguna de sus etapas. Revisa la consola.'
+        }
+    }
+}
