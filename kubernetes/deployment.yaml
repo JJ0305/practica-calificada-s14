@@ -19,7 +19,7 @@ spec:
           image: jj0305/sistema-gestion-academica:latest
           imagePullPolicy: Always
           ports:
-            - containerPort: 8080
+            - containerPort: 8081
           env:
             - name: DB_HOST
               value: "host.docker.internal"
