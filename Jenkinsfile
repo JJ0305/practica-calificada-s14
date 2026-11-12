@@ -20,19 +20,17 @@ pipeline {
 
         stage('Build') {
             steps {
-                sh 'mvn clean compile'
+                sh 'mvn clean compile -Dspring.datasource.url=jdbc:mysql://host.docker.internal:3306/db_gestion_academica?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC'
             }
         }
-
         stage('Test') {
             steps {
-                sh 'mvn test'
+                sh 'mvn test -Dspring.datasource.url=jdbc:mysql://host.docker.internal:3306/db_gestion_academica?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC'
             }
         }
-
         stage('Package') {
             steps {
-                sh 'mvn package -DskipTests'
+                sh 'mvn package -DskipTests -Dspring.datasource.url=jdbc:mysql://host.docker.internal:3306/db_gestion_academica?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC'
             }
         }
 
