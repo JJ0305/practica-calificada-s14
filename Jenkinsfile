@@ -51,9 +51,10 @@ pipeline {
             }
         }
 
-        stage('Deploy') {
+        stage('Deploy to Kubernetes') {
             steps {
-                sh 'kubectl apply --validate=false -f kubernetes/'
+                echo "Imagen subida exitosamente a Docker Hub."
+                echo "Ejecuta 'kubectl apply -f kubernetes/' en tu terminal local para actualizar el clúster."
             }
         }
     }
