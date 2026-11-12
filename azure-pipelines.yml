@@ -1,0 +1,57 @@
+trigger:
+  - main
+
+pool:
+  vmImage: 'ubuntu-latest'
+
+variables:
+  imageName: 'jj0305/sistema-gestion-academica'
+  tag: '$(Build.BuildId)'
+
+stages:
+  - stage: BuildAndTest
+    displayName: 'Build, Test y Package con Maven'
+    jobs:
+      - job: MavenJob
+        displayName: 'Compilar y Empaquetar Spring Boot'
+        steps:
+          - task: Maven@4
+            displayName: 'Ejecutar Maven Package'
+            inputs:
+              mavenPomFile: 'pom.xml'
+              goals: 'clean package'
+              options: '-DskipTests'
+              publishJUnitResults: false
+              javaHomeOption: 'JDKVersion'
+              jdkVersionOption: '1.17'
+
+          - task: CopyFiles@2
+            displayName: 'Copiar JAR generado'
+            inputs:
+              SourceFolder: '$(System.DefaultWorkingDirectory)/target'
+              Contents: '*.jar'
+              TargetFolder: '$(Build.ArtifactStagingDirectory)'
+
+          - task: PublishBuildArtifacts@1
+            displayName: 'Publicar Artefacto'
+            inputs:
+              PathtoPublish: '$(Build.ArtifactStagingDirectory)'
+              ArtifactName: 'drop'
+
+  - stage: DockerBuildPush
+    displayName: 'Construir y Subir Imagen Docker'
+    dependsOn: BuildAndTest
+    jobs:
+      - job: DockerJob
+        displayName: 'Docker Build & Push'
+        steps:
+          - task: Docker@2
+            displayName: 'Build y Push a Docker Hub'
+            inputs:
+              containerRegistry: 'DockerHubConnection'
+              repository: '$(imageName)'
+              command: 'buildAndPush'
+              Dockerfile: '**/Dockerfile'
+              tags: |
+                $(tag)
+                latest

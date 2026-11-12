@@ -1,0 +1,33 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sistema-gestion-academica-deployment
+  labels:
+    app: sistema-gestion-academica
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sistema-gestion-academica
+  template:
+    metadata:
+      labels:
+        app: sistema-gestion-academica
+    spec:
+      containers:
+        - name: sistema-gestion-academica
+          image: jj0305/sistema-gestion-academica:latest
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: DB_HOST
+              value: "host.docker.internal"
+            - name: DB_PORT
+              value: "3306"
+            - name: DB_NAME
+              value: "db_gestion_academica"
+            - name: DB_USER
+              value: "root"
+            - name: DB_PASS
+              value: ""
