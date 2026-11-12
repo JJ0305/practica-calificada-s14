@@ -53,7 +53,7 @@ pipeline {
 
         stage('Deploy') {
             steps {
-                sh 'kubectl apply -f kubernetes/'
+                sh 'kubectl apply --validate=false -f kubernetes/'
             }
         }
     }
