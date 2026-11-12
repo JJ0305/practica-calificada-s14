@@ -1,6 +1,10 @@
 pipeline {
     agent any
 
+    tools {
+        maven 'Maven3'
+    }
+    
     environment {
         DOCKER_CREDENTIALS_ID = 'dockerhub-credentials' 
         DOCKER_IMAGE_NAME     = 'jj0305/sistema-gestion-academica'
